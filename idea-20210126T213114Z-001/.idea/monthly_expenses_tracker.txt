@@ -1,0 +1,15 @@
+Reece 200 Charity 2021-11-11 2020-11-10
+justrite 234 Charity 2022-11-12
+amaka 256 Personal 2020-11-10
+test 250 Personal 2010-10-10
+AndrewGreene 300.0 Charity 2019-12-23
+mybaby 2300.0 Utilities 2021-01-31
+Maryland 20 Charity 2022-02-01
+alabama 0.0 Welfare 2020-12-24
+montana 65 Business/Investment 2020-12-23
+cmu-africa 0.0 Business/Investment 2020-12-31
+albany 75.0 Business/Investment 2020-03-01
+albany SUNY 75.0 Business/Investment 2020-03-03
+Taiwo 2345 Welfare 2021-11-21
+yetunde 300.0 Business/Investment 2023-07-10
+Albany 290.0 Utilities 2021-11-11
