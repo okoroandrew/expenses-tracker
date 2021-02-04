@@ -1,26 +1,27 @@
 from Attributes_of_Expenses_Tracker import *
-from Edit_all import *
 from screen_clear import clear
 
-print ("==========================================\n")
-print ("======  MONTHLY EXPENSES TRACKER  ========\n")
-print ("==========================================\n")
+print("==========================================\n")
+print("======  MONTHLY EXPENSES TRACKER  ========\n")
+print("==========================================\n")
 
 while True:
-    print ("Select an action")
-    print ("1. Add Expenses")
-    print ("2. Edit Expenses")
-    print ("3. list Expenses")
-    print ("4. Get Expenses")
-    print ("5. Delete Expenses\n")
+    print("Select an action")
+    print("1. Add Expenses")
+    print("2. Edit Expenses")
+    print("3. list Expenses")
+    print("4. Get Expenses")
+    print("5. Delete Expenses\n")
 
     select = input("Select a Number Between 1 and 5: ")
-    print ()
+    print()
     if select == "1":
-        print ("Add Expenses")
-        Add_expenses()          # a function that allows you record your expenses
+        clear()
+        print("Add Expenses")
+        Add_expenses()  # a function that allows you record your expenses
 
     elif select == "2":
+        clear()
         print("1. Edit All")
         print("2. Edit")
         option_ = input("Enter an option: ")
@@ -28,12 +29,12 @@ while True:
             Edit_all()
         elif option_ == "2":
             while True:
-                print ("Edit Expenses")
+                print("Edit Expenses")
                 print("1. Edit Title")
                 print("2. Edit Amount")
                 print("3. Edit Tag")
                 print("4. Edit Date")
-                print ("0. Quit")
+                print("0. Quit")
                 option = input("Select 1-4: ")
                 if option == "1":
                     Edit_expenses_title()
@@ -47,18 +48,21 @@ while True:
                     break
 
     elif select == "3":
-        print ("==== List Expenses ====")
-        List_expenses()         # a function that reads the txt file and displays the list of expenses
+        clear()
+        print("==== List Expenses ====")
+        List_expenses()  # a function that reads the txt file and displays the list of expenses
 
     elif select == "4":
-        print ("Get Expenses")
+        clear()
+        print("Get Expenses")
         Get_expenses()
 
     elif select == "5":
-        print ("Delete Expenses")
+        clear()
+        print("Delete Expenses")
         print("1. Delete Expenses")
         print("2. Delete ALL Expenses")
-        options = input ("SELECT 1 or 2: ")
+        options = input("SELECT 1 or 2: ")
         if options == "1":
             Delete_expenses()
         elif options == "2":
@@ -67,8 +71,11 @@ while True:
                 Delete_all_expenses()
 
     else:
-        print ("Enter a valid command")
+        clear()
+        print("Enter a valid command")
+        continue
 
     clear()
     stop = input("perform another operation (y/n): ")
-    if stop.title() == "N": break
+    if stop.title() == "N":
+        break

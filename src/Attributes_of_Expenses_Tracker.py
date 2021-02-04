@@ -1,309 +1,451 @@
+from expenses_tracker_table import *
+from datetime import datetime
+from screen_clear import clear
+import sqlite3
+
 def Add_expenses():
     """This is a function that adds an item to our list of expenses
     Here you will be prompted to add the expenses: title (String), amount (float)
     tags (List of strings), and date (date)
     """
-    #import datetime to convert date string into date object
-    from datetime import datetime
-    from screen_clear import clear
-
     clear()
-    #Open a txt file to save expenses
-    file = open("monthly_expenses_tracker.txt", "a+") #open a text file in a+ mode. a+ is the append and read mode
-
+    data_list = []
     while True:
-        #Enter title (string) and write to a txt file
         title = input("Enter the Title of the Expenses: ")
-        file.write(title)
-        file.write(" ")
         clear()
-        #Use try except to catch invalid input in amount
-        amount = input("Enter the amount spent: ")
-        try:
-            amount = float(amount)
-            file.write(str(amount))
-            file.write(" ")
-        except:
-            print ("Enter a valid number!")
+        # Use try except to catch invalid input in amount
+        while True:
+            amount = input("Enter the amount spent: ")
+            try:
+                amount = float(amount)
+                break
+            except:
+                print("Enter a valid number!")
 
-        print ("Select a Tag")
+        print("Select a Tag")
         # select appropriate tag from the list
-        tags = ["Personal", "Business/Investment", "Welfare", "Utilities", "Charity"]
-        for tag in range (0,5):
-            print (tag+1, tags[tag])
-        select = input ("Enter number corresponding to tag: ")
-        if select == "1":
-            tag = "Business/Investment"
-        elif select == "2":
-            tag = "Welfare"
-        elif select == "3":
-            tag = "Utilities"
-        elif select == "4":
-            tag = "Charity"
-        else:
-            tag = "Other"
-        file.write(tag)
-        file.write(" ")
+        while True:
+            tags = ["Personal", "Business/Investment", "Welfare", "Utilities", "Charity"]
+            for tag in range(0, 5):
+                print(tag + 1, tags[tag])
+            select = input("Enter number corresponding to tag: ")
+            if select == "2":
+                clear()
+                tag = "Business/Investment"
+                break
+            elif select == "3":
+                clear()
+                tag = "Welfare"
+                break
+            elif select == "4":
+                clear()
+                tag = "Utilities"
+                break
+            elif select == "5":
+                clear()
+                tag = "Charity"
+                break
+            elif select == "1":
+                clear()
+                tag = "Personal"
+                break
+            else:
+                clear()
+                print("Select a valid number")
+                continue
+
+        # input date as a string, use datetime to convert to a date
+        while True:
+            clear()
+            date_string = input("Enter date using the format dd/mm/yy: ")
+            try:
+                date = datetime.strptime(date_string, "%d/%m/%y")  # converts date string to datetime format
+                date = date.date()  # The .date() alows you to display just the date instead of date and time
+                break
+            except:
+                print("Enter a valid date!!!")
+
+        data = (title, amount, tag, date)
+        data_list.append(data)
 
         clear()
-        #input date as a string, use datetime to convert to a date
-        date_string = input("Enter date using the format dd/mm/yy: ")
-        try:
-            date = datetime.strptime(date_string,"%d/%m/%y") #converts date string to datetime format
-            print(date.date())          #The .date() alows you to display just the date instead of date and time
-            file.write(str(date.date()))    #allows you to write a string to the text file
-        except:
-            print ("Enter a valid date!!!")
-        file.write("\n")
-
-        clear()
-
         add_another_expenses = input("Add Another Expenses? y/n")
         if add_another_expenses.title() == "N": break
-    file.close()
-#add_expenses()
+    insert_into_table(data_list)
 
+
+
+def Edit_all():
+    """ Edits the whole row"""
+    clear()
+    new_title = input("Enter new title: ")
+    while True:
+        try:
+            new_amount = float(input("Enter new amount: "))
+            break
+        except:
+            print("Enter a valid amount")
+    tags = ["Personal", "Business/Investment", "Welfare", "Utilities", "Charity"]
+    print("=======TAGS=======")
+    print("1. Personal")
+    print("2. Business/Investment")
+    print("3. Welfare")
+    print("4. Utilities")
+    print("5. Charity")
+
+    while True:
+        options = input("Select Tag : ")
+        if options == "1":
+            new_tag = tags[0]
+            break
+        elif options == "2":
+            new_tag = tags[1]
+            break
+        elif options == "3":
+            new_tag = tags[2]
+            break
+        elif options == "4":
+            new_tag = tags[3]
+            break
+        elif options == "5":
+            new_tag = tags[4]
+            break
+        else:
+            print("select a valid tag")
+
+    while True:
+        try:
+            date_string = input("Enter new date dd/mm/yy: ")
+            date = datetime.strptime(date_string, "%d/%m/%y")
+            new_date = date.date()
+            break
+        except:
+            print("Enter a valid date")
+
+    while True:
+        try:
+            id = int(input("enter the Id: "))
+            break
+        except:
+            print("enter a valid id")
+    try:
+        conn = sqlite3.connect("monthly_expenses_tracker.db")
+        cur = conn.cursor()
+        sqlite_update_query = """UPDATE Expenses_Tracker SET title= ?, amount =?,
+                                tag = ?, created_at = ? WHERE id = ?""";
+        cur.execute(sqlite_update_query, (new_title, new_amount, new_tag, new_date, id))
+        conn.commit()
+    except:
+        print("Failed")
+    finally:
+        if conn:
+            conn.close()
+#Edit_all()
 
 def Edit_expenses_title():
-    """This is a function that edits an expenses title. it opens the file in read mode, and uses readlines to read the
-    file as a list of strings, line by line. A for loop iterates through each item on the list, use the split method on
-    each item to get a list. it uses list slicing, to grab the first item on the list which corresponds to the title. if
-    the title corresponds to the title we want to edit, it sets the title to the new title. the join method converts the
-    list back to a string, and stored in a new_list. the file is opened in the write mode, and new list is sent to the txt
-    file in this mode, which overwrites the content of the file. Thereby, editing the title
-    """
-    from screen_clear import clear
+    """This is a function that edits an expenses title.
+    It does it by using the Update querry, setting the old title to a new title"""
     clear()
+    new_title = input("Enter new title: ")
+    while True:
+        try:
+            id = int(input("enter the Id: "))
+            break
+        except:
+            print("Enter a valid id")
+    try:
+        conn = sqlite3.connect("monthly_expenses_tracker.db")
+        cur = conn.cursor()
+        sqlite_update_query = """UPDATE Expenses_Tracker SET title = ?
+                                WHERE id = ?""";
 
-    filehandle = open("monthly_expenses_tracker.txt", "r")
-    list_of_expenses = filehandle.readlines()
+        cur.execute(sqlite_update_query,(new_title, id))
+        conn.commit()
+        cur.close()
+    except:
+        print("Failed to connect and update db")
+    finally:
+        if conn:
+            conn.close()
 
-    title_to_edit = input("Enter Title to edit")
-    new_title = input("Enter New Title")
-    new_list = []
+#Edit_expenses_title()
 
-    for a_list in list_of_expenses:     # iterates through each item in the list_of_expenses
-        a_list = a_list.split()         # converts the string to a list using the split method
-        if a_list[0] == title_to_edit:  # checks if the first item of each iteration corresponds to the title_to_edit
-            a_list[0] = new_title       # sets the initial title to a new title
-        list_to_str = " ".join([str(elem) for elem in a_list])   #uses list comprehension to convert the list to string
-        new_list.append(list_to_str + "\n")  #adds the strings to a new list
-
-    filehandle = open("monthly_expenses_tracker.txt", "w") #opens the file in write mode
-    filehandle.writelines(new_list)                        # uses writelines method to write new_lines to the file
-    filehandle.close()                                     # closes the file
 
 def Edit_expenses_amount():
     """ Edits the amount"""
-    from screen_clear import clear
     clear()
+    try:
+        conn = sqlite3.connect("monthly_expenses_tracker.db")
+        cur = conn.cursor()
+        sqlite_update_amount_query = """UPDATE Expenses_Tracker SET amount = ?
+                                        WHERE id = ?""";
+        while True:
+            try:
+                new_amount = float(input("Enter new amount: "))
+                break
+            except:
+                print("enter a valid amount")
+        while True:
+            try:
+                id = int(input("Enter id: "))
+                break
+            except:
+                print("enter a valid id")
 
-    filehandle = open("monthly_expenses_tracker.txt", "r")
-    list_of_expenses = filehandle.readlines()
+        cur.execute(sqlite_update_amount_query, (new_amount, id))
+        conn.commit()
+        cur.close()
+    except:
+        print("failed to connect and update")
+    finally:
+        if conn:
+            conn.commit()
+#Edit_expenses_amount()
 
-    title_to_edit = input("Enter Title to edit")
-    new_amount = input("Enter New Amount")
-    new_list = []
-
-    for a_list in list_of_expenses:     # iterates through each item in the list_of_expenses
-        a_list = a_list.split()
-        if a_list[0] == title_to_edit:  # checks if the first item of each iteration corresponds to the title_to_edit
-            a_list[1] = new_amount
-        list_to_str = " ".join([str(elem) for elem in a_list])  # uses list comprehension to convert the list to string
-        new_list.append(list_to_str + "\n")
-
-    filehandle = open("monthly_expenses_tracker.txt", "w") #opens the file in write mode
-    filehandle.writelines(new_list)                        # uses writelines method to write new_lines to the file
-    filehandle.close()
 
 def Edit_expenses_tag():
     """ Edits the tag"""
-    from screen_clear import clear
     clear()
-
-    filehandle = open("monthly_expenses_tracker.txt", "r")
-    list_of_expenses = filehandle.readlines()
-
-    title_to_edit = input("Enter Title to edit")
-    new_list = []
-
-    # select appropriate tag from the list
-    print("Select a Tag")
     tags = ["Personal", "Business/Investment", "Welfare", "Utilities", "Charity"]
-    for tag in range(0, 5):
-        print(tag+1, tags[tag])
+    print("=======TAGS=======")
+    print("1. Personal")
+    print("2. Business/Investment")
+    print("3. Welfare")
+    print("4. Utilities")
+    print("5. Charity")
 
-    select = input("Enter number corresponding to tag: ")
-    if select == "1":
-        tag = "Personal"
-    elif select == "2":
-        tag = "Business/Investment"
-    elif select == "3":
-        tag = "Welfare"
-    elif select == "4":
-        tag = "Utilities"
-    elif select == "5":
-        tag = "Charity"
-    else:
-        tag = "Other"
+    while True:
+        options = input("Select Tag : ")
+        if options == "1":
+            new_tag = tags[0]
+            break
+        elif options == "2":
+            new_tag = tags[1]
+            break
+        elif options == "3":
+            new_tag = tags[2]
+            break
+        elif options == "4":
+            new_tag = tags[3]
+            break
+        elif options == "5":
+            new_tag = tags[4]
+            break
+        else:
+            print("Enter a valid number")
 
-    for a_list in list_of_expenses:     # iterates through each item in the list_of_expenses
-        a_list = a_list.split()
-        if a_list[0] == title_to_edit:  # checks if the first item of each iteration corresponds to the title_to_edit
-            a_list[2] = tag
-        list_to_str = " ".join([str(elem) for elem in a_list])  # uses list comprehension to convert the list to string
-        new_list.append(list_to_str + "\n")
+    while True:
+        try:
+            id = int(input("enter the Id: "))
+            break
+        except:
+            print("enter a valid id")
 
-    filehandle = open("monthly_expenses_tracker.txt", "w")  # opens the file in write mode
-    filehandle.writelines(new_list)  # uses writelines method to write new_lines to the file
-    filehandle.close()
+    try:
+        conn = sqlite3.connect("monthly_expenses_tracker.db")
+        cur = conn.cursor()
+        sqlite_update_query = """UPDATE Expenses_Tracker SET tag = ?
+                                    WHERE id = ?""";
+
+        cur.execute(sqlite_update_query, (new_tag, id))
+        conn.commit()
+    except:
+        print("Failed")
+    finally:
+        if conn:
+            conn.close()
+#Edit_expenses_tag()
 
 def Edit_expenses_date():
     """ Edits the creation date"""
-    from datetime import datetime
-    from screen_clear import clear
     clear()
-
-    filehandle = open("monthly_expenses_tracker.txt", "r")
-    list_of_expenses = filehandle.readlines()
-
-    title_to_edit = input("Enter Title to edit")
-    new_list = []
-
-    date_string = input("Enter date using the format dd/mm/yy: ")
     try:
-        date = datetime.strptime(date_string, "%d/%m/%y")  # converts date string to datetime format
-        date = date.date()  # The .date() alows you to display just the date instead of date and time
-        new_date = str(date)
+        conn = sqlite3.connect("monthly_expenses_tracker.db")
+        cur = conn.cursor()
+        sqlite_update_amount_query = """UPDATE Expenses_Tracker SET created_at = ?
+                                        WHERE id = ?""";
+        while True:
+            try:
+                date_string = input("Enter new date dd/yy/mm: ")
+                date = datetime.strptime(date_string, "%d/%m/%y")
+                new_date = date.date()
+                break
+            except:
+                print("Enter a valid date")
+
+        while True:
+            try:
+                id = int(input("Enter id: "))
+                break
+            except:
+                print("Enter a valid id")
+                
+        cur.execute(sqlite_update_amount_query, (new_date, id))
+        conn.commit()
+        cur.close()
+
     except:
-        print("Enter a valid date!!!")
-
-    for a_list in list_of_expenses:     # iterates through each item in the list_of_expenses
-        a_list = a_list.split()
-        if a_list[0] == title_to_edit:  # checks if the first item of each iteration corresponds to the title_to_edit
-            a_list[3] = new_date
-        list_to_str = " ".join([str(elem) for elem in a_list])  # uses list comprehension to convert the list to string
-        new_list.append(list_to_str + "\n")
-
-    filehandle = open("monthly_expenses_tracker.txt", "w")  # opens the file in write mode
-    filehandle.writelines(new_list)  # uses writelines method to write new_lines to the file
-    filehandle.close()
-
+        print("failed to connect and update")
+    finally:
+        if conn:
+            conn.commit()
+#Edit_expenses_date()
 
 def List_expenses():
-    """ A function that reads a text file and displays the list of espenses
+    """ A function that displays the list of espenses contained in the database
     by their title, amount and date_created"""
+    try:
+        connection = sqlite3.connect("monthly_expenses_tracker.db")
+        cursor = connection.cursor()
+        sqlite_select_all_query = "SELECT * FROM Expenses_Tracker"
+        for row in cursor.execute(sqlite_select_all_query):
+            print(f"{row[0]}. Title: {row[1]}")
+            print("Amount: ${}".format(row[2]))
+            print("Tag: {}".format(row[3]))
+            print(f"Date: {row[4]} \n")
 
-    #from screen_clear import clear
-    #clear
-    with open("monthly_expenses_tracker.txt", "r") as filehandle:
-        file = filehandle.readlines()
-        print ("=============List of Expenses==========")
-        for item in file:
-            if item == " ":
-                print ("No Record Found")
-                break
-            item = item.split()
-            print(f"Title: {item[0].title()}")
-            print("Amount: ${}".format(item[1]))
-            print("Tag: {}".format(item[2]))
-            print(f"Date: {item[3].title()}")
-            print("\n")
+        cursor.close()
+    except sqlite3.Error:
+        print("Failed to Retrieve List")
+    finally:
+        if connection:
+            connection.close()
+
+#List_expenses()
 
 
 def Get_expenses():
     """ A function that allows you to search and retrieves expenses using any of the attributes:
     title, amount, tag, date. """
 
-    from datetime import datetime
-    with open("monthly_expenses_tracker.txt", "r") as filehandle:
-        file = filehandle.readlines()
+    try:
+        connection = sqlite3.connect("monthly_expenses_tracker.db")
+        cursor = connection.cursor()
+        sqlite_get_expenses_query = "SELECT * FROM Expenses_Tracker"
 
         print("=========Select Search Option=========")
         print("1. Title")
         print("2. Amount")
         print("3. Tag")
         print("4. Date")
-
-        search_option = input("Enter number corresponding to search option: ")
-        if search_option == "1" or search_option == " ":
-            search_title = input("Enter Search Title: ")
-            for item in file:
-                item = item.split()
-                if search_title == item[0]:
-                    print("Title: {}".format(item[0].title()))
-                    print("Amount: ${}".format(item[1]))
-                    print("Tag: {}".format(item[2]))
-                    print("Date: {}".format(item[3]))
-                    print()
-
-        elif search_option == "2":
-            search_amount = input("Enter Search Amount: ")
-            for item in file:
-                item = item.split()
-                if search_amount == item[1]:
-                    print("Title: {}".format(item[0].title()))
-                    print("Amount: ${}".format(item[1]))
-                    print("Tag: {}".format(item[2]))
-                    print("Date: {}".format(item[3]))
-                    print()
-
-        elif search_option == "3":
-            search_tag = input("Enter Search Tag: ")
-            for item in file:
-                item = item.split()
-                if search_tag.title() == item[2]:
-                    print("Title: {}".format(item[0].title()))
-                    print("Amount: ${}".format(item[1]))
-                    print("Tag: {}".format(item[2]))
-                    print("Date: {}".format(item[3]))
-                    print()
-
-        elif search_option == "4":
-            date_string = input("Enter date using the format dd/mm/yy: ")
+        while True:
             try:
-                date = datetime.strptime(date_string, "%d/%m/%y")  # converts date string to datetime format
-                search_date = str(date.date())
-                for item in file:
-                    item = item.split()
-                    if search_date == item[3]:
-                        print("Title: {}".format(item[0].title()))
-                        print("Amount: ${}".format(item[1]))
-                        print("Tag: {}".format(item[2]))
-                        print("Date: {}".format(item[3]))
-                        print()
+                search_option = int(input("Enter Search option: "))
+                if search_option == 1:
+                    clear()
+                    search_title = input("Enter Search Title: ")
+                    for row in cursor.execute(sqlite_get_expenses_query):
+                        if search_title == row[1]:
+                            print("Title: {}".format(row[1].title()))
+                            print("Amount: ${}".format(row[2]))
+                            print("Tag: {}".format(row[3]))
+                            print("Date: {}".format(row[4]))
+                            print()
+                    break
+
+                elif search_option == 2:
+                    clear()
+                    while True:
+                        try:
+                            search_amount = float(input("Enter Search Amount: "))
+                            break
+                        except:
+                            print("Enter a valid amount")
+                    for row in cursor.execute(sqlite_get_expenses_query):
+                        if search_amount == row[2]:
+                            print("Title: {}".format(row[1].title()))
+                            print("Amount: ${}".format(row[2]))
+                            print("Tag: {}".format(row[3]))
+                            print("Date: {}".format(row[4]))
+                            print()
+                    break
+
+                elif search_option == 3:
+                    clear()
+                    search_tag = input("Enter Search Tag: ")
+                    for row in cursor.execute(sqlite_get_expenses_query):
+                        if search_tag == row[3]:
+                            print("Title: {}".format(row[1].title()))
+                            print("Amount: ${}".format(row[2]))
+                            print("Tag: {}".format(row[3]))
+                            print("Date: {}".format(row[4]))
+                            print()
+                    break
+
+                elif search_option == 4:
+                    clear()
+                    while True:
+                        try:
+                            search_date = input("Enter Search date dd/mm/yy: ")
+                            date = datetime.strptime(search_date, "%d/%m/%y")
+                            search_date2 = date.date()
+                            break
+                        except:
+                            print("enter a valid date")
+
+                    for row in cursor.execute(sqlite_get_expenses_query):
+                        if search_date2 == row[4]:
+                            print("Title: {}".format(row[1].title()))
+                            print("Amount: ${}".format(row[2]))
+                            print("Tag: {}".format(row[3]))
+                            print("Date: {}".format(row[4]))
+                            print()
+                    break
+
+                else:
+                    print("Select a valid number")
+                    continue
             except:
-                print("Enter a valid date!!!")
+                print("Enter a valid number")
+    except sqlite3.Error:
+        print("Failed to connect!!!")
+    finally:
+        if connection:
+            connection.close()
+
 #Get_expenses()
 
 
 def Delete_expenses():
-    """ This is a function that allows you to delete your expenses from the text file.
-    The file will be opened in read mode. The readlines is used to read the lines in the file
-    and store it in lines.
-    The file is then opened again in write mode, for loop is used to go through the variable (lines): line by line,
-    lines that does not start with the title of the expense you want to delete are saved in the text file.
-    The write mode means that the previous content of the file is over written
+    """ This is a function that allows you to delete your expenses from the database using their title.
+    it prompts you to enter the title of the expenses you want to delete, and deletes it.
+    if there are more than one expenses with the same title, it displays them and prompts you to enter
+    the id of the one you want to delete.
     """
-    line_to_edit = ''
-    with open("monthly_expenses_tracker.txt", "r") as filehandle:
-        lines = filehandle.readlines()
+    try:
+        connection = sqlite3.connect("monthly_expenses_tracker.db")
+        cursor = connection.cursor()
+        sqlite_delete_query = """DELETE FROM Expenses_Tracker
+                                WHERE title = ?"""
+        title_of_row_to_delete = input("Enter title of Expenses to delete: ")
+        cursor.execute(sqlite_delete_query,(title_of_row_to_delete, ))
+        connection.commit()
+        cursor.close()
 
-    with open("monthly_expenses_tracker.txt", "w") as filehandle:
-        item_title = input("Enter the title of expenses to delete: ")
-        for line in lines:
-            if line.startswith(item_title):
-                line_to_edit = line
-                continue
-            filehandle.write(line)
+    except sqlite3.Error:
+        print("Failed to delete all !!!")
+
+    finally:
+        if connection:
+            connection.close()
+#Delete_expenses()
 
 def Delete_all_expenses():
     """ A function that deletes all expenses from the record
-    it writes an empty string to the file"""
+    """
+    try:
+        connection = sqlite3.connect("monthly_expenses_tracker.db")
+        cursor = connection.cursor()
+        sqlite_delete_all_query = "DELETE FROM Expenses_Tracker"
+        cursor.execute(sqlite_delete_all_query)
+        #connection.commit()                    i commented it out for test sake,
+        cursor.close()
 
-    empty = " "
-    with open("monthly_expenses_tracker.txt", "w") as filehandle:
-        filehandle.write(empty)
+    except sqlite3.Error:
+        print("Failed to delete all !!!")
 
+    finally:
+        if connection:
+            connection.close()
 
-
+#Delete_all_expenses()
