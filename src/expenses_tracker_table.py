@@ -6,14 +6,13 @@ def create_table():
      the table has roles: id, title, Amount, tag, creation_date"""
 
     try:
-        connection = sqlite3.connect("monthly_expenses_tracker.db")
+        connection = sqlite3.connect("monthly_expenses_tracker_class.db")
         cursor = connection.cursor()
         sqlite3_create_table_query = """CREATE TABLE Expenses_Tracker (
                             id INTEGER PRIMARY KEY,
                             title TEXT NOT NULL,
                             amount REAL NOT NULL,
-                            tag TEXT,
-                            created_at DATETIME NOT NULL); """
+                            tag TEXT); """
         cursor.execute(sqlite3_create_table_query)
         print("table successfully created")
         cursor.close()
@@ -35,7 +34,7 @@ def insert_into_table(data_list):
                                     (title, amount, tag, created_at) VALUES
                                     (?,?,?,?);"""
         data_tuple = data_list
-        cursor.executemany(sqlite3_insert_table_query, data_tuple)
+        cursor.execute(sqlite3_insert_table_query, data_tuple)
         connection.commit()
         cursor.close()
 
@@ -45,3 +44,4 @@ def insert_into_table(data_list):
     finally:
         if connection:
             connection.close()
+

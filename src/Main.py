@@ -1,3 +1,4 @@
+from expenses_attributes import *
 from Attributes_of_Expenses_Tracker import *
 from screen_clear import clear
 
@@ -5,6 +6,7 @@ print("==========================================\n")
 print("======  MONTHLY EXPENSES TRACKER  ========\n")
 print("==========================================\n")
 
+expense = ExpenseRepository()       # instance of the class
 while True:
     print("Select an action")
     print("1. Add Expenses")
@@ -18,7 +20,11 @@ while True:
     if select == "1":
         clear()
         print("Add Expenses")
-        Add_expenses()  # a function that allows you record your expenses
+        expense.add_expense_title()
+        expense.add_expense_amount()
+        expense.add_expense_tag()
+        expense.add_expense_created_at()
+        expense.save_to_db()
 
     elif select == "2":
         clear()
@@ -50,12 +56,12 @@ while True:
     elif select == "3":
         clear()
         print("==== List Expenses ====")
-        List_expenses()  # a function that reads the txt file and displays the list of expenses
+        expense.list_expense()  # a function that reads the txt file and displays the list of expenses
 
     elif select == "4":
         clear()
         print("Get Expenses")
-        Get_expenses()
+        expense.get_by_id()
 
     elif select == "5":
         clear()
@@ -64,11 +70,14 @@ while True:
         print("2. Delete ALL Expenses")
         options = input("SELECT 1 or 2: ")
         if options == "1":
-            Delete_expenses()
+            clear()
+            expense.delete_expense()
         elif options == "2":
+            clear()
             warning = input("This will delete all your records: press (y) to continue: ")
             if warning.title() == "Y":
-                Delete_all_expenses()
+                clear()
+                expense.delete_all_expenses()
 
     else:
         clear()
